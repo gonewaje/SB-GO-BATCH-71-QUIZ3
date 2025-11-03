@@ -16,16 +16,16 @@ type Config struct {
 	DBPassword  string
 	DBName      string
 	JWTSecret   string
-	DatabaseURL string // constructed dynamically
+	DatabaseURL string
 }
 
 func Load() *Config {
-	_ = godotenv.Load("config/.env")
+	_ = godotenv.Overload("config/.env")
 
-	if _, err := os.Stat("config/.env"); err != nil {
-		log.Println("📦 No local .env found — using system environment variables")
+	if _, err := os.Stat("config/.env"); err == nil {
+		log.Println("✅ Loaded config/.env file (env vars can still override)")
 	} else {
-		log.Println("✅ Loaded config/.env file")
+		log.Println("📦 No local .env found — using system environment variables")
 	}
 
 	cfg := &Config{
@@ -50,9 +50,8 @@ func Load() *Config {
 }
 
 func getenv(key, def string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		return def
+	if val := os.Getenv(key); val != "" {
+		return val
 	}
-	return val
+	return def
 }
