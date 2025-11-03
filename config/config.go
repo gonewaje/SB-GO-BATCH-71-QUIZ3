@@ -20,9 +20,15 @@ type Config struct {
 }
 
 func Load() *Config {
-	// Load .env file
-	if err := godotenv.Load("config/.env"); err != nil {
-		log.Println("⚠️ No .env file found, using environment variables")
+	// 🧩 Load .env file without overwriting existing environment variables
+	// (so host env always takes precedence)
+	_ = godotenv.Load("config/.env")
+
+	// If .env is missing, just log it (don’t panic)
+	if _, err := os.Stat("config/.env"); err != nil {
+		log.Println("📦 No local .env found — using system environment variables")
+	} else {
+		log.Println("✅ Loaded config/.env file")
 	}
 
 	cfg := &Config{
@@ -40,13 +46,16 @@ func Load() *Config {
 		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
 	)
 
-	log.Printf("Loaded configuration: DB_HOST=%s, DB_NAME=%s", cfg.DBHost, cfg.DBName)
+	log.Printf("🔧 Loaded configuration: DB_HOST=%s, DB_NAME=%s, PORT=%s",
+		cfg.DBHost, cfg.DBName, cfg.Port)
+
 	return cfg
 }
 
 func getenv(key, def string) string {
-	if val := os.Getenv(key); val != "" {
-		return val
+	val := os.Getenv(key)
+	if val == "" {
+		return def
 	}
-	return def
+	return val
 }
