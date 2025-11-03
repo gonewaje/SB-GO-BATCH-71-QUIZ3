@@ -20,11 +20,8 @@ type Config struct {
 }
 
 func Load() *Config {
-	// 🧩 Load .env file without overwriting existing environment variables
-	// (so host env always takes precedence)
 	_ = godotenv.Load("config/.env")
 
-	// If .env is missing, just log it (don’t panic)
 	if _, err := os.Stat("config/.env"); err != nil {
 		log.Println("📦 No local .env found — using system environment variables")
 	} else {
